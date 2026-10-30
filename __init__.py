@@ -19,6 +19,7 @@ from aqt.utils import tooltip
 import re
 import unicodedata
 import urllib.parse
+import html
 
 
 try:
@@ -92,14 +93,17 @@ def saveField(note, fld, val):
         tagsTxt = unicodedata.normalize("NFC", htmlToTextLine(val))
         txt = mw.col.tags.canonify(mw.col.tags.split(tagsTxt))
         field = note.tags
+  
     else:
         # https://github.com/dae/anki/blob/47eab46f05c8cc169393c785f4c3f49cf1d7cca8/aqt/editor.py#L257-L263
         txt = urllib.parse.unquote(val)
+        txt = html.unescape(txt)
         txt = unicodedata.normalize("NFC", txt)
         txt = mungeHTML(txt)
-        txt = txt.replace("\x00", "")
+        txt = txt.replace("\\x00", "")
         txt = mw.col.media.escapeImages(txt, unescape=True)
         field = note[fld]
+    
     if field == txt:
         return
     config = mw.addonManager.getConfig(__name__)
